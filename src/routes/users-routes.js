@@ -5,7 +5,7 @@ const { checkAuth, checkRole } = require('../middlewares/check');
 
 const router = express.Router();
 
-router.use(checkAuth, checkRole(['superadmin']));
+router.use(checkAuth);
 
 router.get('/', usersControllers.getUsers);
 
