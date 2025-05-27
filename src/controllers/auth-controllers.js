@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const HttpError = require('../util/errors/http-error');
 const { User } = require('../models/user');
 const generateToken = require('../util/generateToken');
-const sendRecoveryEmail = require('../emails/nodemailer');
+const sendRecoveryEmail = require('../emails/sendRecoveryEmail');
 const { 
     studentRegisterValidations, 
     userLogInValidations,
@@ -21,7 +21,14 @@ const autoRegister = async (req, res, next) => {
         const existingUser = await User.findOne({ email });
         if (existingUser) throw new HttpError('It already exists a user with given email.', 422);
 
-        const createdUser = new User(req.body);
+        const createdUser = new User({
+            name,
+            email,
+            password,
+            role: 'student'
+        });
+
+        if (createdUser.role !== 'student') throw new HttpError('Auto registered user can only be "student".', 400);
         await createdUser.save();
 
         res.status(201).json({
@@ -93,7 +100,7 @@ const passwordRecovery = async (req, res, next) => {
 const passwordReset = async (req, res, next) => {
     try {
         const { recoveryToken, newPassword } = req.body;
-        passwordValidations(req.body.newPassword);
+        passwordValidations(newPassword);
 
         const decodedToken = jwt.verify(recoveryToken, process.env.JWT_SIGN);
         if (!decodedToken) throw new HttpError('Invalid or expired token.', 403);

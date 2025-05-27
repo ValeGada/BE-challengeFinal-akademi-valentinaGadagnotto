@@ -55,8 +55,7 @@ const emailValidations = function (data) {
     }
 };
 
-const passwordValidations = function (data) {
-    const { password } = data;
+const passwordValidations = function (password) {
     const errors = [];
     
     if (!password) errors.push('Password is a required field.');

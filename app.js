@@ -34,7 +34,7 @@ app.use('/auth', authRoutes);
 app.use('/users', usersRoutes);
 app.use('/courses', coursesRoutes);
 app.use('/enrollments', enrollmentsRoutes);
-app.use('/grades', gradesRoutes);
+// app.use('/grades', gradesRoutes);
 
 // unsupported routes error
 app.use((req, res, next) => {

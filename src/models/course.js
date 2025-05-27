@@ -25,4 +25,4 @@ courseSchema.virtual(
     }
 );
 
-module.exports = mongoose.model('Course', CourseSchema);
+module.exports = mongoose.model('Course', courseSchema);

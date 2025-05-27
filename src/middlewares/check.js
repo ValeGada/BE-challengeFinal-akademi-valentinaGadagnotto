@@ -8,7 +8,7 @@ const checkAuth = async (req, res, next) => {
         if(!token){
             throw new Error('Authentication failed');
         }
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SIGN);
         const user = await User.findById(decoded.userId);
 
         if (!user) {

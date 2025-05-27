@@ -5,7 +5,7 @@ const { User, usersRoles } = require('../models/user');
 const { 
     userCreateValidations,
     userEditValidations 
-} = require('../util/validations/userValidations');
+} = require('../util/validators/user-validators');
 
 const getUsers = async (req, res, next) => {
     try {
@@ -60,9 +60,7 @@ const getUser = async (req, res, next) => {
         const { uid } = req.params;
     
         // ID validation
-        if (!mongoose.Types.ObjectId.isValid(uid)) {
-            return next(new HttpError('Invalid user ID format.', 400));
-        }
+        if (!mongoose.Types.ObjectId.isValid(uid)) throw new HttpError('Invalid user ID format.', 400);
 
         const user = await User.findById(uid);
         if(!user) throw new HttpError('User not found.', 404);

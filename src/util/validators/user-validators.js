@@ -20,7 +20,8 @@ const userCreateValidations = function (data) {
 
     // Role
     if (!role) errors.push('Role is required.');
-    if (!usersRoles.includes(role)) errors.push('Role must be "admin" or "emp".');
+    if (!usersRoles.includes(role)) errors.push('Role does not exist.');
+    if (role === 'student') errors.push('Role must be either "superadmin" or "professor".')
 
     if (errors.length > 0) {
         throw new HttpError(errors.join(' '), 400);
