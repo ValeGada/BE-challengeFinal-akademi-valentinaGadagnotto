@@ -131,8 +131,9 @@ const createCourse = async (req, res, next) => {
 
         let assignedProfessor;
         if (req.user.role === 'superadmin') {
-            assignedProfessor = await User.find(professor);
+            assignedProfessor = await User.findById(professor);
             if (!assignedProfessor) throw new HttpError('Professor not found.', 404);
+            if (assignedProfessor.role !== 'professor') throw new HttpError('The specified user is not a professor.', 400);
         };
 
         if (req.user.role === 'professor') {

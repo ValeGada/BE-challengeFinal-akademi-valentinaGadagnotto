@@ -1,6 +1,6 @@
 const HttpError = require('../errors/http-error');
 
-const courseCreateValidations = async function (data) {
+const courseCreateValidations = function (data) {
     const { title, description, maximumCapacity } = data;
     const errors = [];
     
