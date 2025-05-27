@@ -122,7 +122,7 @@ const editUser = async (req, res, next) => {
 
         const userObject = user.toObject({ getters: true });
         delete userObject.password; // No mostrar la contraseña en la respuesta
-        res.status(200).json({ message: 'Edited user.', userObject });
+        res.status(200).json({ message: 'User successfully edited.', userObject });
     } catch (err) {
         return next(err);
     }
@@ -136,7 +136,7 @@ const deleteUser = async (req, res, next) => {
 
         const userObject = user.toObject({ getters: true });
         delete userObject.password; // No mostrar la contraseña en la respuesta
-        res.status(200).json({ message: 'Deleted user.', userObject });
+        res.status(200).json({ message: 'USer successfully deleted.', userObject });
     } catch (err) {
         return next(err);
     }

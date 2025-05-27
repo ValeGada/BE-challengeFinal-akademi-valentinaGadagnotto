@@ -10,6 +10,16 @@ const usersRoles = [
     'student'
 ]
 
+const professorProfileSchema = new Schema({
+    givenGrades: [{ type: Schema.Types.ObjectId, ref: 'Grade' }],
+    createdCourses: [{ type: Schema.Types.ObjectId, ref: 'Course' }]
+}, { _id: false }); // Que el profile no tenga ID propio
+
+const studentProfileSchema = new Schema({
+    receivedGrades: [{ type: Schema.Types.ObjectId, ref: 'Grade' }],
+    enrollments: [{ type: Schema.Types.ObjectId, ref: 'Enrollment' }]
+}, { _id: false });
+
 const userSchema = new Schema({
     name: { 
         type: String, 
@@ -47,6 +57,10 @@ const userSchema = new Schema({
     recoveryToken: { 
         type: String, 
         default: null 
+    },
+    profile: {
+        type: Schema.Types.Mixed,
+        default: {}
     }
 }, {
     timestamps: true,
@@ -67,32 +81,24 @@ userSchema.pre('save', async function(next) {
     }
 });
 
-// Cursos creados
-userSchema.virtual('createdCourses', {
-  ref: 'Course',
-  localField: '_id',
-  foreignField: 'professor'
-});
+userSchema.pre('save', async function (next) {
+    if (this.role === 'professor') {
+        const professorProfile = new mongoose.Document(this.profile, professorProfileSchema);
+        if (!professorProfile.validateSync()) {
+            return next(new Error('Invalid professor profile structure.'));
+        }
+        this.profile = professorProfile.toObject();
+    }
 
-// Suscripciones
-userSchema.virtual('enrollments', {
-  ref: 'Enrollment',
-  localField: '_id',
-  foreignField: 'student'
-});
+    if (this.role === 'student') {
+        const studentProfile = new mongoose.Document(this.profile, studentProfileSchema);
+        if (!satisfiestudentProfile.validateSync()) {
+            return next(new Error('Invalid student profile structure.'));
+        }
+        this.profile = studentProfile.toObject();
+    }
 
-// Notas puestas
-userSchema.virtual('givenGrade', {
-  ref: 'Grade',
-  localField: '_id',
-  foreignField: 'professor'
-});
-
-// Notas recibidas
-userSchema.virtual('recievedGrade', {
-  ref: 'Grade',
-  localField: '_id',
-  foreignField: 'student'
+    next();
 });
 
 const User = mongoose.model('User', userSchema);

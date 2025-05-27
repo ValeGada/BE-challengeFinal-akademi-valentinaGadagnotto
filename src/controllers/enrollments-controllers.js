@@ -148,7 +148,7 @@ const cancelEnrollment = async (req, res, next) => {
         if (!enrollment) throw new HttpError('Enrollment not found.', 404);
 
         const enrollmentObject = enrollment.toObject({ getters: true });
-        res.status(200).json({ message: 'Canceled enrollment.', enrollmentObject });
+        res.status(200).json({ message: 'Enrollment successfully canceled.', enrollmentObject });
     } catch (err) {
         return next(err);
     }

@@ -182,7 +182,7 @@ const editCourse = async (req, res, next) => {
         await course.save();
 
         const courseObject = course.toObject({ getters: true });
-        res.status(200).json({ message: 'Edited course.', courseObject });
+        res.status(200).json({ message: 'Course successfully edited.', courseObject });
     } catch (err) {
         return next(err);
     }
@@ -195,8 +195,7 @@ const deleteCourse = async (req, res, next) => {
         if (!course) throw new HttpError('User not found.', 404);
 
         const courseObject = course.toObject({ getters: true });
-        delete courseObject.password; // No mostrar la contraseña en la respuesta
-        res.status(200).json({ message: 'Deleted course.', courseObject });
+        res.status(200).json({ message: 'Course successfullly deleted.', courseObject });
     } catch (err) {
         return next(err);
     }
