@@ -11,13 +11,29 @@ const usersRoles = [
 ]
 
 const professorProfileSchema = new Schema({
-    givenGrades: [{ type: Schema.Types.ObjectId, ref: 'Grade' }],
-    createdCourses: [{ type: Schema.Types.ObjectId, ref: 'Course' }]
+    givenGrades: { 
+        type: [Schema.Types.ObjectId], 
+        ref: 'Grade',
+        default: []
+    },
+    createdCourses: { 
+        type: [Schema.Types.ObjectId], 
+        ref: 'Course',
+        default: []
+    }
 }, { _id: false }); // Que el profile no tenga ID propio
 
 const studentProfileSchema = new Schema({
-    receivedGrades: [{ type: Schema.Types.ObjectId, ref: 'Grade' }],
-    enrollments: [{ type: Schema.Types.ObjectId, ref: 'Enrollment' }]
+    receivedGrades: { 
+        type: [Schema.Types.ObjectId], 
+        ref: 'Grade',
+        default: []
+    },
+    enrollments: { 
+        type: [Schema.Types.ObjectId], 
+        ref: 'Enrollment',
+        default: []
+    }
 }, { _id: false });
 
 const userSchema = new Schema({
@@ -82,23 +98,25 @@ userSchema.pre('save', async function(next) {
 });
 
 userSchema.pre('save', async function (next) {
-    if (this.role === 'professor') {
-        const professorProfile = new mongoose.Document(this.profile, professorProfileSchema);
-        if (!professorProfile.validateSync()) {
-            return next(new Error('Invalid professor profile structure.'));
+    try {
+        if (this.role === 'professor' && (!this.profile || Object.keys(this.profile).length === 0)) {
+            this.profile = {
+                givenGrades: [],
+                createdCourses: []
+            };
         }
-        this.profile = professorProfile.toObject();
-    }
 
-    if (this.role === 'student') {
-        const studentProfile = new mongoose.Document(this.profile, studentProfileSchema);
-        if (!satisfiestudentProfile.validateSync()) {
-            return next(new Error('Invalid student profile structure.'));
+        if (this.role === 'student' && (!this.profile || Object.keys(this.profile).length === 0)) {
+            this.profile = {
+                receivedGrades: [],
+                enrollments: []
+            };
         }
-        this.profile = studentProfile.toObject();
-    }
 
-    next();
+        next();
+    } catch (err) {
+        next(err)
+    }
 });
 
 const User = mongoose.model('User', userSchema);
