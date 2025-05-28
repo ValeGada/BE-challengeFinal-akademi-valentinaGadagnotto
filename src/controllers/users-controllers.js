@@ -57,12 +57,12 @@ const getUsers = async (req, res, next) => {
 
 const getUser = async (req, res, next) => {
     try {
-        const { uid } = req.params;
+        const { id } = req.params;
     
         // ID validation
-        if (!mongoose.Types.ObjectId.isValid(uid)) throw new HttpError('Invalid user ID format.', 400);
+        if (!mongoose.Types.ObjectId.isValid(id)) throw new HttpError('Invalid user ID format.', 400);
 
-        const user = await User.findById(uid);
+        const user = await User.findById(id);
         if(!user) throw new HttpError('User not found.', 404);
 
         const userObject = user.toObject({ getters: true });
@@ -96,11 +96,11 @@ const createUser = async (req, res, next) => {
 };
 
 const editUser = async (req, res, next) => {
-    const { uid } = req.params;
+    const { id } = req.params;
     const { name, email, role } = req.body;
     
     // ID validation
-    if (!mongoose.Types.ObjectId.isValid(uid)) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
         return next(new HttpError('Invalid user ID format.', 400));
     }
 
@@ -114,7 +114,7 @@ const editUser = async (req, res, next) => {
     try {
         userEditValidations(req.body);
 
-        const user = await User.findById(uid);
+        const user = await User.findById(id);
         if (!user) throw new HttpError('User not found.', 404);
     
         updates.forEach(update => user[update] = req.body[update]);
@@ -130,8 +130,8 @@ const editUser = async (req, res, next) => {
 
 const deleteUser = async (req, res, next) => {
     try {
-        const { uid } = req.params;
-        const user = await User.findByIdAndDelete(uid);
+        const { id } = req.params;
+        const user = await User.findByIdAndDelete(id);
         if (!user) throw new HttpError('User not found.', 404);
 
         const userObject = user.toObject({ getters: true });

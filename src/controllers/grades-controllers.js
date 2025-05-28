@@ -132,12 +132,12 @@ const postGrade = async (req, res, next) => {
 };
 
 const editGrade = async (req, res, next) => {
-    const { gid } = req.params;
+    const { id } = req.params;
     const { score } = req.body
     
     
     // ID validation
-    if (!mongoose.Types.ObjectId.isValid(gid)) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
         return next(new HttpError('Invalid grade ID format.', 400));
     }
 
@@ -151,12 +151,8 @@ const editGrade = async (req, res, next) => {
     try {
         gradeScoreValidations(score);
 
-        const editedGrade = await Grade.findById(gid);
+        const editedGrade = await Grade.findById(id);
         if (!editedGrade) throw new HttpError('Grade not found.', 404);
-
-        if (editedGrade.professor.toString() !== req.user.id) {
-            throw new HttpError('You are not the author of this grade.', 403);
-        }
 
         editedGrade.score = score;
         await editedGrade.save();

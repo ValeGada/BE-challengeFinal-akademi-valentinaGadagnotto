@@ -133,9 +133,19 @@ const enroll = async (req, res, next) => {
         });
 
         await newEnrollment.save();
+        await User.findByIdAndUpdate(
+            user._id,
+            { $push: { 'profile.enrollments': newEnrollment._id } }
+        );
 
-        const enrollmentObject = newEnrollment.toObject({ getters: true });    
-        res.status(201).json(enrollmentObject);
+        const studentObj = user.toObject({ getters: true});
+        delete studentObj.password;
+
+        res.status(201).json({ 
+            enrollment: {
+                course: newEnrollment.course,
+                student: studentObj
+        }});
     } catch (err) {
         return next(err);
     }
@@ -143,8 +153,8 @@ const enroll = async (req, res, next) => {
 
 const cancelEnrollment = async (req, res, next) => {
     try {
-        const { eid } = req.params;
-        const enrollment = await Enrollment.findByIdAndDelete(eid);
+        const { id } = req.params;
+        const enrollment = await Enrollment.findByIdAndDelete(id);
         if (!enrollment) throw new HttpError('Enrollment not found.', 404);
 
         const enrollmentObject = enrollment.toObject({ getters: true });

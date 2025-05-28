@@ -1,7 +1,7 @@
 const express = require('express');
 
 const usersControllers = require('../controllers/users-controllers');
-const { checkAuth, checkRole } = require('../middlewares/check');
+const { checkAuth } = require('../middlewares/check');
 
 const router = express.Router();
 
@@ -9,12 +9,12 @@ router.use(checkAuth);
 
 router.get('/', usersControllers.getUsers);
 
-router.get('/:uid', usersControllers.getUser);
+router.get('/:id', usersControllers.getUser);
 
 router.post('/', usersControllers.createUser);
 
-router.put('/:uid', usersControllers.editUser);
+router.put('/:id', usersControllers.editUser);
 
-router.delete('/:uid', usersControllers.deleteUser);
+router.delete('/:id', usersControllers.deleteUser);
 
 module.exports = router;

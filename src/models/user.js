@@ -100,7 +100,7 @@ userSchema.pre('save', async function(next) {
 userSchema.pre('save', async function (next) {
     try {
         if (this.role === 'professor' && (!this.profile || Object.keys(this.profile).length === 0)) {
-            this.profile = {
+             this.profile = {
                 givenGrades: [],
                 createdCourses: []
             };

@@ -54,12 +54,12 @@ const getCourses = async (req, res, next) => {
 
 const getCourse = async (req, res, next) => {
     try {
-        const { cid } = req.params;
+        const { id } = req.params;
     
         // ID validation
-        if (!mongoose.Types.ObjectId.isValid(cid)) throw new HttpError('Invalid course ID format.', 400);
+        if (!mongoose.Types.ObjectId.isValid(id)) throw new HttpError('Invalid course ID format.', 400);
 
-        const course = await Course.findById(cid);
+        const course = await Course.findById(id);
         if(!course) throw new HttpError('Course not found.', 404);
 
         const courseObject = course.toObject({ getters: true });    
@@ -148,20 +148,30 @@ const createCourse = async (req, res, next) => {
         });
 
         await createdCourse.save();
+        await User.findByIdAndUpdate(
+            assignedProfessor._id,
+            { $push: { 'profile.createdCourses': createdCourse._id } }
+        );
 
-        const courseObject = createdCourse.toObject({ getters: true });    
-        res.status(201).json(courseObject);
+        const courseObj = createdCourse.toObject({ getters: true });
+        const professorObj = assignedProfessor.toObject({ getters: true });
+        delete professorObj.password;
+        
+        res.status(201).json({
+            courseObj,
+            professorObj
+        });
     } catch (err) {
         return next(err);
     }
 };
 
 const editCourse = async (req, res, next) => {
-    const { cid } = req.params;
+    const { id } = req.params;
     const { title, description, maximumCapacity } = req.body;
     
     // ID validation
-    if (!mongoose.Types.ObjectId.isValid(cid)) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
         return next(new HttpError('Invalid course ID format.', 400));
     }
 
@@ -175,7 +185,7 @@ const editCourse = async (req, res, next) => {
     try {
         courseEditValidations(req.body);
 
-        const course = await Course.findById(cid);
+        const course = await Course.findById(id);
         if (!course) throw new HttpError('Course not found.', 404);
     
         updates.forEach(update => course[update] = req.body[update]);
@@ -190,8 +200,8 @@ const editCourse = async (req, res, next) => {
 
 const deleteCourse = async (req, res, next) => {
     try {
-        const { cid } = req.params;
-        const course = await Course.findByIdAndDelete(cid);
+        const { id } = req.params;
+        const course = await Course.findByIdAndDelete(id);
         if (!course) throw new HttpError('User not found.', 404);
 
         const courseObject = course.toObject({ getters: true });
