@@ -35,6 +35,8 @@ const getCourses = async (req, res, next) => {
         sortOptions[sortBy] = sortOrder === 'asc' ? 1 : -1;
 
         const courses = await Course.find(filter)
+            .populate('professor', 'name')
+            .populate('enrollmentsCount')
             .skip((pageNumber - 1) * limitNumber)
             .limit(limitNumber)
             .sort(sortOptions);
@@ -59,7 +61,7 @@ const getCourse = async (req, res, next) => {
         // ID validation
         if (!mongoose.Types.ObjectId.isValid(id)) throw new HttpError('Invalid course ID format.', 400);
 
-        const course = await Course.findById(id);
+        const course = await Course.findById(id).populate('professor', 'name');
         if(!course) throw new HttpError('Course not found.', 404);
 
         const courseObject = course.toObject({ getters: true });    
@@ -71,13 +73,13 @@ const getCourse = async (req, res, next) => {
 
 const getCoursesByProfId = async (req, res, next) => {
     try {
-        const { pid } = req.params;
+        const { id } = req.params;
         const { title, page=1, limit=10, search = '', sortBy = 'title', sortOrder = 'asc' } = req.query;
     
         // ID validation
-        if (!mongoose.Types.ObjectId.isValid(pid)) throw new HttpError('Invalid user ID format.', 400);
+        if (!mongoose.Types.ObjectId.isValid(id)) throw new HttpError('Invalid user ID format.', 400);
 
-        const professor = await User.findById(pid);
+        const professor = await User.findById(id);
         if(!professor) throw new HttpError('Professor user not found.', 404);
 
         const pageNumber = parseInt(page, 10);
@@ -86,16 +88,9 @@ const getCoursesByProfId = async (req, res, next) => {
         if (isNaN(pageNumber) || pageNumber <= 0) throw new HttpError('Invalid page number', 400);
         if (isNaN(limitNumber) || limitNumber <= 0) throw new HttpError('Invalid limit number', 400);
 
-        let filter = { professor: pid };
+        let filter = { professor: id };
         if (search) {
-            const normalizedSearch = search.trim();
-            const matchingCourses = await Course.find({
-                title: new RegExp(normalizedSearch, 'i')
-            }).select('_id');
-
-            const courseIds = matchingCourses.map(course => course._id);
-
-            filter.course = { $in: courseIds };
+            filter.title = new RegExp(search.trim(), 'i');
         }
 
         const totalCourses = await Course.countDocuments(filter);
@@ -104,6 +99,8 @@ const getCoursesByProfId = async (req, res, next) => {
         sortOptions[sortBy] = sortOrder === 'asc' ? 1 : -1;
 
         const courses = await Course.find(filter)
+            .populate('professor', 'name')
+            .populate('enrollmentsCount')
             .skip((pageNumber - 1) * limitNumber)
             .limit(limitNumber)
             .sort(sortOptions);
@@ -131,7 +128,7 @@ const createCourse = async (req, res, next) => {
 
         let assignedProfessor;
         if (req.user.role === 'superadmin') {
-            assignedProfessor = await User.findById(professor);
+            assignedProfessor = await User.findOne({ name: professor, role: 'professor' });
             if (!assignedProfessor) throw new HttpError('Professor not found.', 404);
             if (assignedProfessor.role !== 'professor') throw new HttpError('The specified user is not a professor.', 400);
         };
@@ -191,8 +188,8 @@ const editCourse = async (req, res, next) => {
         updates.forEach(update => course[update] = req.body[update]);
         await course.save();
 
-        const courseObject = course.toObject({ getters: true });
-        res.status(200).json({ message: 'Course successfully edited.', courseObject });
+        const courseObj = course.toObject({ getters: true });
+        res.status(200).json({ message: 'Course successfully edited.', courseObj });
     } catch (err) {
         return next(err);
     }

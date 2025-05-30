@@ -14,7 +14,7 @@ router.get('/:id', coursesControllers.getCourse);
 
 router.use(checkRole(['superadmin', 'professor']));
 
-router.get('/professor/:pid', coursesControllers.getCoursesByProfId)
+router.get('/professor/:id', coursesControllers.getCoursesByProfId);
 
 router.post('/', coursesControllers.createCourse);
 

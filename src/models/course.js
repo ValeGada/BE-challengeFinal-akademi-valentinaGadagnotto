@@ -16,12 +16,11 @@ const courseSchema = new Schema({
     toObject: { virtuals: true }
 });
 
-courseSchema.virtual(
-    'enrollments', 
-    {
+courseSchema.virtual('enrollmentsCount', {
         ref: 'Enrollment',
         localField: '_id',
-        foreignField: 'course'
+        foreignField: 'course',
+        count: true
     }
 );
 

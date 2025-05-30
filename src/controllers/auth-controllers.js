@@ -31,11 +31,9 @@ const autoRegister = async (req, res, next) => {
         if (createdUser.role !== 'student') throw new HttpError('Auto registered user can only be "student".', 400);
         await createdUser.save();
 
-        res.status(201).json({
-            userId: createdUser.id, 
-            email: createdUser.email,
-            role: createdUser.role
-        });
+        const createdUserObj = createdUser.toObject({ getters: true });
+        delete createdUserObj.password;
+        res.status(201).json(createdUserObj);
     } catch (err) {
         return next(err);
     }
@@ -52,7 +50,7 @@ const logIn = async (req, res, next) => {
         const isValidPassword = await bcrypt.compare(password, user.password);
         if (!isValidPassword) throw new HttpError('Invalid credentials, could not log you in.', 403);
 
-        const token = generateToken({ userId: user.id, email: user.email, role: user.role });
+        const token = generateToken({ userId: user.id, name: user.name, email: user.email, role: user.role });
 
         const expirationDate = new Date(Date.now() + 3600000); // 1h
         res.status(200).json({ 

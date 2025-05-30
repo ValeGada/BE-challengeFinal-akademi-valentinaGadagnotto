@@ -19,8 +19,8 @@ const courseCreateValidations = function (data) {
         maximumCapacity === ''
     ) errors.push('Maximum capacity is a required field.');
     if (isNaN(maximumCapacity)) errors.push('Maximum capacity must be a number.');
-    if (Number(maximumCapacity) < 10) errors.push('Maximum capacity must be at least 10.');
-    if (Number(maximumCapacity) > 100) errors.push('Maximum capacity cannot exceed 1000.');
+    if (Number(maximumCapacity) < 2) errors.push('Maximum capacity must be at least 2.');
+    if (Number(maximumCapacity) > 10) errors.push('Maximum capacity cannot exceed 10.');
 
     if (errors.length > 0) {
         throw new HttpError(errors.join(' '), 400);
@@ -39,8 +39,8 @@ const courseEditValidations = function (data) {
 
     // Maximum Capacity
     if (maximumCapacity && isNaN(maximumCapacity)) errors.push('Maximum capacity must be a number.');
-    if (maximumCapacity && Number(maximumCapacity) < 10) errors.push('Maximum capacity must be at least 10.');
-    if (maximumCapacity && Number(maximumCapacity) > 100) errors.push('Maximum capacity cannot exceed 1000.');
+    if (maximumCapacity && Number(maximumCapacity) < 2) errors.push('Maximum capacity must be at least 2.');
+    if (maximumCapacity && Number(maximumCapacity) > 10) errors.push('Maximum capacity cannot exceed 10.');
 
     if (errors.length > 0) {
         throw new HttpError(errors.join(' '), 400);

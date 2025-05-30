@@ -126,6 +126,14 @@ const enroll = async (req, res, next) => {
         const user = await User.findById(req.user.id);
         if (!user) throw new HttpError('No user found.', 404);
         if (user.role === 'professor') throw new HttpError('Only students can enroll to a course.', 400);
+        
+        const currentEnrollments = await Enrollment.countDocuments({ course: existingCourse });
+        if (currentEnrollments >= existingCourse.maximumCapacity) {
+            throw new HttpError('Maximum course capacity reached.', 400);
+        }
+
+        const alreadyEnrolled = await Enrollment.findOne({ student: user, course: existingCourse });
+        if (alreadyEnrolled) throw new HttpError('Student already enrolled in this course.', 400);
 
         const newEnrollment = new Enrollment({
             student: user,
@@ -143,8 +151,8 @@ const enroll = async (req, res, next) => {
 
         res.status(201).json({ 
             enrollment: {
-                course: newEnrollment.course,
-                student: studentObj
+                student: studentObj,
+                course: newEnrollment.course
         }});
     } catch (err) {
         return next(err);
