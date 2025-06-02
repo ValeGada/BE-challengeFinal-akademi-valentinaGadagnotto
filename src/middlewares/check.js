@@ -7,13 +7,13 @@ const checkAuth = async (req, res, next) => {
     try {
         const token = req.headers.authorization?.split(' ')[1];
         if(!token){
-            throw new Error('Authentication failed.');
+            throw new HttpError('Authentication failed.', 403);
         }
         const decoded = jwt.verify(token, process.env.JWT_SIGN);
-        const user = await User.findById(decoded.userId);
+        const user = await User.findById(decoded.id);
 
         if (!user) {
-            throw new Error('User not found.');
+            throw new HttpError('User not found.', 404);
         }
 
         req.user = user;
@@ -39,24 +39,26 @@ const checkRole = (allowedRoles) => {
     }
 };
 
-const checkOwnership = (Model, ownerField = 'professor') => {
+const checkOwnership = (Model, ownerField) => {
     return async (req, res, next) => {
         try {
             const { id } = req.params;
-            const userId = req.user.id;
+            const user = req.user;
 
             if (!mongoose.Types.ObjectId.isValid(id)) {
                 throw new HttpError('Invalid resourse ID format.', 400);
             }
-
+            
             const resource = await Model.findById(id);
             if (!resource) throw new HttpError('Resource not found', 404);
-
+            
             const owner = resource[ownerField];
+            const ownerUser = await User.findById(owner);
+            if (!ownerUser) throw new HttpError('Resource has no owner defined.', 403);
+            
+            if (user.role === 'superadmin') return next();
 
-            if (!owner || owner.toString() !== userId && owner.role !== 'superadmin') {
-                throw new HttpError('You are not allowed to perform this action.', 403);
-            }
+            if (ownerUser.id !== user.id) throw new HttpError('You are not allowed to perform this action.', 403);
 
             next()
         } catch (err) {

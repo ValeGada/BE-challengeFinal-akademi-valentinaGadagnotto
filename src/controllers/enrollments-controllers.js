@@ -40,7 +40,15 @@ const getEnrollments = async (req, res, next) => {
         sortOptions[sortBy] = sortOrder === 'asc' ? 1 : -1;
 
         const enrollments = await Enrollment.find(filter)
-            .populate('course', 'title description professor enrollments maximumCapacity')
+            .populate({ 
+                path: 'course', 
+                select: 'title description professor maximumCapacity', 
+                populate: {
+                    path: 'professor', 
+                    select: 'name' 
+                }
+            })
+            .populate('student', 'id receivedGrades')
             .skip((pageNumber - 1) * limitNumber)
             .limit(limitNumber)
             .sort(sortOptions);

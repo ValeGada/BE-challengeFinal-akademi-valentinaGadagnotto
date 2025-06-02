@@ -38,7 +38,7 @@ const userEditValidations = function (data) {
 
     // Role
     if (role && !usersRoles.includes(role)) errors.push('Role must be "admin" or "emp".');
-    console.log(errors)
+
     if (errors.length > 0) {
         throw new HttpError(errors.join(' '), 400);
     }

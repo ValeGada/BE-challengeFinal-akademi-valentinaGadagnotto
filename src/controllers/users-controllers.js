@@ -76,8 +76,8 @@ const getUser = async (req, res, next) => {
 
 const createUser = async (req, res, next) => {
     try {
-        const { name, email, password, role } = req.body;
         userCreateValidations(req.body);
+        const { name, email, password, role } = req.body;
 
         const existingUser = await User.findOne({ email });
         if (existingUser) throw new HttpError('It already exists a user with given email.', 422);
@@ -86,7 +86,7 @@ const createUser = async (req, res, next) => {
         await createdUser.save();
 
         res.status(201).json({
-            userId: createdUser.id, 
+            id: createdUser.id, 
             email: createdUser.email,
             role: createdUser.role
         });

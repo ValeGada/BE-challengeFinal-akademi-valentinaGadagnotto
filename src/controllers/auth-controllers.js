@@ -15,8 +15,8 @@ const {
 
 const autoRegister = async (req, res, next) => {
     try {
-        const { name, email, password } = req.body;
         studentRegisterValidations(req.body);
+        const { name, email, password } = req.body;
 
         const existingUser = await User.findOne({ email });
         if (existingUser) throw new HttpError('It already exists a user with given email.', 422);
@@ -28,7 +28,6 @@ const autoRegister = async (req, res, next) => {
             role: 'student'
         });
 
-        if (createdUser.role !== 'student') throw new HttpError('Auto registered user can only be "student".', 400);
         await createdUser.save();
 
         const createdUserObj = createdUser.toObject({ getters: true });
@@ -41,8 +40,8 @@ const autoRegister = async (req, res, next) => {
 
 const logIn = async (req, res, next) => {
     try {
-        const { email, password } = req.body;
         userLogInValidations(req.body);
+        const { email, password } = req.body;
 
         const user = await User.findOne({ email });
         if (!user) throw new HttpError('Invalid credentials, could not log you in.', 403);
@@ -50,14 +49,19 @@ const logIn = async (req, res, next) => {
         const isValidPassword = await bcrypt.compare(password, user.password);
         if (!isValidPassword) throw new HttpError('Invalid credentials, could not log you in.', 403);
 
-        const token = generateToken({ userId: user.id, name: user.name, email: user.email, role: user.role });
+        const token = generateToken({ 
+            id: user.id, 
+            name: user.name, 
+            email: user.email, 
+            role: user.role 
+        });
 
         const expirationDate = new Date(Date.now() + 3600000); // 1h
         res.status(200).json({ 
             token,
             expiration: expirationDate.toISOString(),
             user: {
-                userId: user.id,
+                id: user.id,
                 name: user.name,
                 email: user.email,
                 role: user.role
@@ -70,13 +74,17 @@ const logIn = async (req, res, next) => {
 
 const passwordRecovery = async (req, res, next) => {
     try {
-        const { email } = req.body;
         emailValidations(req.body);
+        const { email } = req.body;
 
         const user = await User.findOne({ email });
         if (!user) throw new HttpError('Invalid email, could not recover your password.', 422);
 
-        const recoveryToken = generateToken({ userId: user.id, email: user.email, role: user.role }, '15m');
+        const recoveryToken = generateToken({ 
+            id: user.id, 
+            email: user.email, 
+            role: user.role 
+        }, '15m');
         user.recoveryToken = recoveryToken;
 
         await user.save();
@@ -103,7 +111,7 @@ const passwordReset = async (req, res, next) => {
         const decodedToken = jwt.verify(recoveryToken, process.env.JWT_SIGN);
         if (!decodedToken) throw new HttpError('Invalid or expired token.', 403);
         
-        const user = await User.findById(decodedToken.userId);
+        const user = await User.findById(decodedToken.id);
         if (!user) throw new HttpError('User not found.', 404);
         if (recoveryToken !== user.recoveryToken) throw new HttpError('Invalid or expired token.', 403);
 

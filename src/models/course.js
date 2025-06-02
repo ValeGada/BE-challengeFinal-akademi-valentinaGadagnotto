@@ -17,11 +17,17 @@ const courseSchema = new Schema({
 });
 
 courseSchema.virtual('enrollmentsCount', {
-        ref: 'Enrollment',
-        localField: '_id',
-        foreignField: 'course',
-        count: true
-    }
-);
+    ref: 'Enrollment',
+    localField: '_id',
+    foreignField: 'course',
+    count: true
+});
+
+// courseSchema.virtual('enrollments', {
+//     ref: 'Enrollment',
+//     localField: '_id',
+//     foreignField: 'course'
+// });
+
 
 module.exports = mongoose.model('Course', courseSchema);

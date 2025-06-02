@@ -36,7 +36,7 @@ const getCourses = async (req, res, next) => {
 
         const courses = await Course.find(filter)
             .populate('professor', 'name')
-            .populate('enrollmentsCount')
+            .populate({ path: 'enrollmentsCount' })
             .skip((pageNumber - 1) * limitNumber)
             .limit(limitNumber)
             .sort(sortOptions);
@@ -61,7 +61,9 @@ const getCourse = async (req, res, next) => {
         // ID validation
         if (!mongoose.Types.ObjectId.isValid(id)) throw new HttpError('Invalid course ID format.', 400);
 
-        const course = await Course.findById(id).populate('professor', 'name');
+        const course = await Course.findById(id)
+            .populate('professor', 'name')
+            .populate({ path: 'enrollmentsCount' });
         if(!course) throw new HttpError('Course not found.', 404);
 
         const courseObject = course.toObject({ getters: true });    
@@ -100,7 +102,8 @@ const getCoursesByProfId = async (req, res, next) => {
 
         const courses = await Course.find(filter)
             .populate('professor', 'name')
-            .populate('enrollmentsCount')
+            .populate({ path: 'enrollmentsCount' })
+            // .populate({ path: 'enrollments', populate: { path: 'student', select: 'name email' } })
             .skip((pageNumber - 1) * limitNumber)
             .limit(limitNumber)
             .sort(sortOptions);
@@ -120,8 +123,8 @@ const getCoursesByProfId = async (req, res, next) => {
 
 const createCourse = async (req, res, next) => {
     try {
-        const { title, description, maximumCapacity, professor } = req.body;
         courseCreateValidations(req.body);
+        const { title, description, maximumCapacity, professor } = req.body;
 
         const existingCourse = await Course.findOne({ title });
         if (existingCourse) throw new HttpError('It already exists a course with that title, try with another one.', 400);
@@ -180,6 +183,7 @@ const editCourse = async (req, res, next) => {
     }
 
     try {
+        req.body.maximumCapacity = Number(req.body.maximumCapacity);
         courseEditValidations(req.body);
 
         const course = await Course.findById(id);
