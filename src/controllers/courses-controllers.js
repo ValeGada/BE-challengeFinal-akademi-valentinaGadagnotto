@@ -102,8 +102,26 @@ const getCoursesByProfId = async (req, res, next) => {
 
         const courses = await Course.find(filter)
             .populate('professor', 'name')
+            .populate({
+                path: 'professor', 
+                select: 'name profile',
+                populate: {
+                    path: 'profile.givenGrades',
+                    model: 'Grade'
+                }
+            })
             .populate({ path: 'enrollmentsCount' })
-            .populate({ path: 'enrollments', populate: { path: 'student', select: 'id name email receivedGrades' } })
+            .populate({ 
+                path: 'enrollments', 
+                populate: { 
+                    path: 'student', 
+                    select: 'id name email profile',
+                    populate: {
+                        path: 'profile.receivedGrades',
+                        model: 'Grade'
+                    } 
+                } 
+            })
             .skip((pageNumber - 1) * limitNumber)
             .limit(limitNumber)
             .sort(sortOptions);
