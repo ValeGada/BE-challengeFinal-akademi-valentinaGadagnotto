@@ -63,12 +63,15 @@ const getUser = async (req, res, next) => {
         if (!mongoose.Types.ObjectId.isValid(id)) throw new HttpError('Invalid user ID format.', 400);
 
         const user = await User.findById(id);
-        if(!user) throw new HttpError('User not found.', 404);
+        if (!user) throw new HttpError('User not found.', 404);
+        if (req.user.id !== id && req.user.role !== 'superadmin') {
+            throw new HttpError('You are not allowed to see this user data', 403)
+        };
 
-        const userObject = user.toObject({ getters: true });
-        delete userObject.password; // No mostrar la contraseña en la respuesta
+        const userObj = user.toObject({ getters: true });
+        delete userObj.password;
     
-        res.status(200).json(userObject);
+        res.status(200).json(userObj);
     } catch (err) {
         return next(err);
     }
@@ -116,13 +119,16 @@ const editUser = async (req, res, next) => {
 
         const user = await User.findById(id);
         if (!user) throw new HttpError('User not found.', 404);
+        if (req.user.id !== id && req.user.role !== 'superadmin') {
+            throw new HttpError('You are not allowed to edit this user data.', 403)
+        };
     
         updates.forEach(update => user[update] = req.body[update]);
         await user.save();
 
-        const userObject = user.toObject({ getters: true });
-        delete userObject.password; // No mostrar la contraseña en la respuesta
-        res.status(200).json({ message: 'User successfully edited.', userObject });
+        const userObj = user.toObject({ getters: true });
+        delete userObj.password; // No mostrar la contraseña en la respuesta
+        res.status(200).json({ message: 'User successfully edited.', userObj });
     } catch (err) {
         return next(err);
     }
@@ -133,6 +139,9 @@ const deleteUser = async (req, res, next) => {
         const { id } = req.params;
         const user = await User.findByIdAndDelete(id);
         if (!user) throw new HttpError('User not found.', 404);
+        if (req.user.id !== id && req.user.role !== 'superadmin') {
+            throw new HttpError('You are not allowed to delete this user.', 403)
+        };
 
         const userObject = user.toObject({ getters: true });
         delete userObject.password; // No mostrar la contraseña en la respuesta
