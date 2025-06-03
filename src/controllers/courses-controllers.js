@@ -103,7 +103,7 @@ const getCoursesByProfId = async (req, res, next) => {
         const courses = await Course.find(filter)
             .populate('professor', 'name')
             .populate({ path: 'enrollmentsCount' })
-            // .populate({ path: 'enrollments', populate: { path: 'student', select: 'name email' } })
+            .populate({ path: 'enrollments', populate: { path: 'student', select: 'id name email receivedGrades' } })
             .skip((pageNumber - 1) * limitNumber)
             .limit(limitNumber)
             .sort(sortOptions);

@@ -48,7 +48,14 @@ const getEnrollments = async (req, res, next) => {
                     select: 'name' 
                 }
             })
-            .populate('student', 'id receivedGrades')
+            .populate({
+                path: 'student', 
+                select: 'id name email profile',
+                populate: {
+                    path: 'profile.receivedGrades',
+                    model: 'Grade'
+                }
+            })
             .skip((pageNumber - 1) * limitNumber)
             .limit(limitNumber)
             .sort(sortOptions);
@@ -106,7 +113,22 @@ const getEnrollmentsPerCourse = async (req, res, next) => {
         }
 
         const enrollments = await Enrollment.find(filter)
-            .populate('student', 'name email')
+            .populate({ 
+                path: 'course', 
+                select: 'title description professor maximumCapacity', 
+                populate: {
+                    path: 'professor', 
+                    select: 'name' 
+                }
+            })
+            .populate({
+                path: 'student', 
+                select: 'id name email profile',
+                populate: {
+                    path: 'profile.receivedGrades',
+                    model: 'Grade'
+                }
+            })            
             .skip((pageNumber - 1) * limitNumber)
             .limit(limitNumber)
             .sort(sortOptions);

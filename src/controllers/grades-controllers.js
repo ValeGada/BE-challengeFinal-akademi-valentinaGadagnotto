@@ -123,8 +123,8 @@ const postGrade = async (req, res, next) => {
         await session.commitTransaction();
         session.endSession();
 
-        const gradeObject = newGrade.toObject({ getters: true });    
-        res.status(201).json(gradeObject);
+        const gradeObj = newGrade.toObject({ getters: true });    
+        res.status(201).json(gradeObj);
     } catch (err) {
         await session.abortTransaction();
         return next(err);
@@ -157,8 +157,8 @@ const editGrade = async (req, res, next) => {
         editedGrade.score = score;
         await editedGrade.save();
 
-        const gradeObject = editedGrade.toObject({ getters: true });
-        res.status(200).json({ message: 'Grade successfully edited.', gradeObject });
+        const gradeObj = editedGrade.toObject({ getters: true });
+        res.status(200).json({ message: 'Grade successfully edited.', gradeObj });
     } catch (err) {
         await session.abortTransaction();
         return next(err);
