@@ -10,7 +10,7 @@ const {
 
 const getCourses = async (req, res, next) => {
     try {
-        const { title, page=1, limit=10, search = '', sortBy = 'title', sortOrder = 'asc' } = req.query;
+        const { page=1, limit=10, search = '', sortBy = 'title', sortOrder = 'asc' } = req.query;
 
         const pageNumber = parseInt(page, 10);
         const limitNumber = parseInt(limit, 10);
@@ -18,15 +18,13 @@ const getCourses = async (req, res, next) => {
         if (isNaN(pageNumber) || pageNumber <= 0) throw new HttpError('Invalid page number', 400);
         if (isNaN(limitNumber) || limitNumber <= 0) throw new HttpError('Invalid limit number', 400);
 
-        let filter = {};
+        let filter = {};        
         if (search) {
             const normalizedSearch = search.trim();
-            filter.title = new RegExp(normalizedSearch, 'i');
-        }
-
-        if (title && !search) {
-            const normalizedTitle = title.trim();
-            filter.title = new RegExp(normalizedTitle, 'i');
+            filter.$or = [
+                { title: new RegExp(normalizedSearch, 'i') },
+                { description: new RegExp(normalizedSearch, 'i') }
+            ];
         }
 
         const totalCourses = await Course.countDocuments(filter);

@@ -9,7 +9,7 @@ const {
 
 const getUsers = async (req, res, next) => {
     try {
-        const { name, role, page=1, limit=10, search = '', sortBy = 'name', sortOrder = 'asc' } = req.query;
+        const { role, page=1, limit=10, search = '', sortBy = 'name', sortOrder = 'asc' } = req.query;
 
         const pageNumber = parseInt(page, 10);
         const limitNumber = parseInt(limit, 10);
@@ -18,14 +18,12 @@ const getUsers = async (req, res, next) => {
         if (isNaN(limitNumber) || limitNumber <= 0) throw new HttpError('Invalid limit number', 400);
 
         let filter = {};
-        if (search) { // filtro por búsqueda (sólo de nombre) si existe
+        if (search) {
             const normalizedSearch = search.trim();
-            filter.name = new RegExp(normalizedSearch, 'i'); // búsqueda insensible a mayúsculas
-        }
-
-        if (name && !search) { // filtrar por nombre sin sobreescribir la búsqueda manual
-            const normalizedName = name.trim();
-            filter.name = new RegExp(normalizedName, 'i');
+            filter.$or = [
+                { name: new RegExp(normalizedSearch, 'i') },
+                { email: new RegExp(normalizedSearch, 'i') }
+            ];
         }
         
         if (role && usersRoles.includes(role)) {
@@ -143,9 +141,9 @@ const deleteUser = async (req, res, next) => {
             throw new HttpError('You are not allowed to delete this user.', 403)
         };
 
-        const userObject = user.toObject({ getters: true });
-        delete userObject.password; // No mostrar la contraseña en la respuesta
-        res.status(200).json({ message: 'USer successfully deleted.', userObject });
+        const userObj = user.toObject({ getters: true });
+        delete userObj.password;
+        res.status(200).json({ message: 'User successfully deleted.', userObj });
     } catch (err) {
         return next(err);
     }

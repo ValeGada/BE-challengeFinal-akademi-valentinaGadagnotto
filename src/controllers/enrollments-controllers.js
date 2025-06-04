@@ -8,7 +8,7 @@ const { User } = require('../models/user');
 const getEnrollments = async (req, res, next) => {
     try {
         const { sid } = req.params;
-        const { title, page=1, limit=10, search = '', sortBy = 'title', sortOrder = 'asc' } = req.query;
+        const { page=1, limit=10, search = '', sortBy = 'title', sortOrder = 'asc' } = req.query;
 
         // ID validation
         if (!mongoose.Types.ObjectId.isValid(sid)) throw new HttpError('Invalid user ID format.', 400);
