@@ -61,6 +61,17 @@ const getCourse = async (req, res, next) => {
 
         const course = await Course.findById(id)
             .populate('professor', 'name')
+            .populate({ 
+                path: 'enrollments', 
+                populate: {
+                    path: 'student',
+                    select: 'profile',
+                    populate: {
+                        path: 'profile.enrollments',
+                        model: 'Enrollment'
+                    }
+                } 
+            })
             .populate({ path: 'enrollmentsCount' });
         if(!course) throw new HttpError('Course not found.', 404);
 

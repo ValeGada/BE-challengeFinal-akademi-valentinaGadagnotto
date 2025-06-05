@@ -115,7 +115,7 @@ const getEnrollmentsPerCourse = async (req, res, next) => {
         const enrollments = await Enrollment.find(filter)
             .populate({ 
                 path: 'course', 
-                select: 'title description professor maximumCapacity', 
+                select: 'id title description professor maximumCapacity', 
                 populate: {
                     path: 'professor', 
                     select: 'name' 
@@ -194,9 +194,12 @@ const cancelEnrollment = async (req, res, next) => {
         const { id } = req.params;
         const enrollment = await Enrollment.findByIdAndDelete(id);
         if (!enrollment) throw new HttpError('Enrollment not found.', 404);
+        if ((enrollment.student.id !== req.user.id) && req.user.role !== 'superadmin') { 
+            throw new HttpError('You cannot cancel enrollments that are not your own.', 403)
+        };
 
-        const enrollmentObject = enrollment.toObject({ getters: true });
-        res.status(200).json({ message: 'Enrollment successfully canceled.', enrollmentObject });
+        const enrollmentObj = enrollment.toObject({ getters: true });
+        res.status(200).json({ message: 'Enrollment successfully canceled.', enrollmentObj });
     } catch (err) {
         return next(err);
     }

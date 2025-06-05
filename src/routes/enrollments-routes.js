@@ -1,8 +1,7 @@
 const express = require('express');
 
 const enrollmentsControllers = require('../controllers/enrollments-controllers');
-const { checkAuth, checkRole, checkOwnership } = require('../middlewares/check');
-const Enrollment = require('../models/enrollment');
+const { checkAuth, checkRole } = require('../middlewares/check');
 
 const router = express.Router();
 
@@ -16,6 +15,6 @@ router.get('/student/:sid', enrollmentsControllers.getEnrollments);
 
 router.post('/', enrollmentsControllers.enroll);
 
-router.delete('/:id', checkOwnership(Enrollment, 'student'), enrollmentsControllers.cancelEnrollment);
+router.delete('/:id', enrollmentsControllers.cancelEnrollment);
 
 module.exports = router;
