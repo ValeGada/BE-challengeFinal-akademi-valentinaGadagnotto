@@ -192,11 +192,17 @@ const enroll = async (req, res, next) => {
 const cancelEnrollment = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const enrollment = await Enrollment.findByIdAndDelete(id);
+        const enrollment = await Enrollment.findById(id);
         if (!enrollment) throw new HttpError('Enrollment not found.', 404);
         if ((enrollment.student.toString() !== req.user.id) && req.user.role !== 'superadmin') { 
             throw new HttpError('You cannot cancel enrollments that are not your own.', 403)
         };
+
+        await enrollment.deleteOne();
+
+        await User.findByIdAndUpdate(enrollment.student, {
+            $pull: { 'profile.enrollments': enrollment._id }
+        });
 
         const enrollmentObj = enrollment.toObject({ getters: true });
         res.status(200).json({ message: 'Enrollment successfully canceled.', enrollmentObj });
