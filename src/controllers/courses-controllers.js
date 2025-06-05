@@ -232,8 +232,8 @@ const deleteCourse = async (req, res, next) => {
         const course = await Course.findByIdAndDelete(id);
         if (!course) throw new HttpError('User not found.', 404);
 
-        const courseObject = course.toObject({ getters: true });
-        res.status(200).json({ message: 'Course successfullly deleted.', courseObject });
+        const courseObj = course.toObject({ getters: true });
+        res.status(200).json({ message: 'Course successfullly deleted.', courseObj });
     } catch (err) {
         return next(err);
     }

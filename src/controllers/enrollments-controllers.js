@@ -194,7 +194,7 @@ const cancelEnrollment = async (req, res, next) => {
         const { id } = req.params;
         const enrollment = await Enrollment.findByIdAndDelete(id);
         if (!enrollment) throw new HttpError('Enrollment not found.', 404);
-        if ((enrollment.student.id !== req.user.id) && req.user.role !== 'superadmin') { 
+        if ((enrollment.student.toString() !== req.user.id) && req.user.role !== 'superadmin') { 
             throw new HttpError('You cannot cancel enrollments that are not your own.', 403)
         };
 
@@ -203,7 +203,7 @@ const cancelEnrollment = async (req, res, next) => {
     } catch (err) {
         return next(err);
     }
-}
+};
 
 module.exports = {
     getEnrollments,
