@@ -19,7 +19,7 @@ const getStudentGrades = async (req, res, next) => {
         if(!student || student.role !== 'student') throw new HttpError('Student user not found.', 404);
 
         const professor = await User.findById(req.user.id);
-        if(!professor || professor.role !== 'professor') throw new HttpError('Professor user not found.', 404);
+        if(!professor || professor.role === 'student') throw new HttpError('Professor user not found.', 404);
 
         const pageNumber = parseInt(page, 10);
         const limitNumber = parseInt(limit, 10);
