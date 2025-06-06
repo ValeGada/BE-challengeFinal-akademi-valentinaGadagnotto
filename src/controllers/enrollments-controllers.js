@@ -14,7 +14,7 @@ const getEnrollments = async (req, res, next) => {
         if (!mongoose.Types.ObjectId.isValid(sid)) throw new HttpError('Invalid user ID format.', 400);
 
         const student = await User.findById(sid);
-        if(!student) throw new HttpError('Student user not found.', 404);
+        if(!student && req.user.role !== 'superadmin') throw new HttpError('Student user not found.', 404);
 
         const pageNumber = parseInt(page, 10);
         const limitNumber = parseInt(limit, 10);
