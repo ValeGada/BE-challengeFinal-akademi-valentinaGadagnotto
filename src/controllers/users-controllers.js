@@ -40,7 +40,7 @@ const getUsers = async (req, res, next) => {
             .limit(limitNumber)
             .sort(sortOptions);
 
-        if (!users || users.length === 0) throw new HttpError('No users found', 404);
+        // if (!users || users.length === 0) throw new HttpError('No users found', 404);
 
         res.json({
             users: users.map(user => user.toObject({ getters: true })),

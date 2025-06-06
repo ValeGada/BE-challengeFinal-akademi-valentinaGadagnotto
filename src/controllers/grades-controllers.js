@@ -10,7 +10,7 @@ const gradeScoreValidations = require('../util/validators/grade-validators');
 const getStudentGrades = async (req, res, next) => {
     try {
         const { sid } = req.params;
-        const { title, page=1, limit=10, search = '', sortBy = 'title', sortOrder = 'asc' } = req.query;
+        const { page=1, limit=10, search = '' } = req.query;
 
         // ID validation
         if (!mongoose.Types.ObjectId.isValid(sid)) throw new HttpError('Invalid user ID format.', 400);
@@ -41,17 +41,13 @@ const getStudentGrades = async (req, res, next) => {
 
         const totalGrades = await Grade.countDocuments(filter);
 
-        const sortOptions = {};
-        sortOptions[sortBy] = sortOrder === 'asc' ? 1 : -1;
-
         const grades = await Grade.find(filter)
             .populate('course', 'title description professor enrollments maximumCapacity')
             .populate('student', 'name email')
             .skip((pageNumber - 1) * limitNumber)
             .limit(limitNumber)
-            .sort(sortOptions);
 
-        if (!grades || grades.length === 0) throw new HttpError('No grades found for this student.', 404);
+        // if (!grades || grades.length === 0) throw new HttpError('No grades found for this student.', 404);
 
         res.json({
             grades: grades.map(grade => grade.toObject({ getters: true })),

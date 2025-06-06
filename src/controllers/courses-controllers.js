@@ -39,7 +39,7 @@ const getCourses = async (req, res, next) => {
             .limit(limitNumber)
             .sort(sortOptions);
 
-        if (!courses || courses.length === 0) throw new HttpError('No courses found', 404);
+        // if (!courses || courses.length === 0) throw new HttpError('No courses found', 404);
 
         res.json({
             courses: courses.map(course => course.toObject({ getters: true })),
@@ -85,7 +85,7 @@ const getCourse = async (req, res, next) => {
 const getCoursesByProfId = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { title, page=1, limit=10, search = '', sortBy = 'title', sortOrder = 'asc' } = req.query;
+        const { page=1, limit=10, search = '', sortBy = 'title', sortOrder = 'asc' } = req.query;
     
         // ID validation
         if (!mongoose.Types.ObjectId.isValid(id)) throw new HttpError('Invalid user ID format.', 400);
@@ -135,7 +135,7 @@ const getCoursesByProfId = async (req, res, next) => {
             .limit(limitNumber)
             .sort(sortOptions);
 
-        if (!courses || courses.length === 0) throw new HttpError('No courses found', 404);
+        // if (!courses || courses.length === 0) throw new HttpError('No courses found', 404);
 
         res.json({
             courses: courses.map(course => course.toObject({ getters: true })),

@@ -60,8 +60,6 @@ const getEnrollments = async (req, res, next) => {
             .limit(limitNumber)
             .sort(sortOptions);
 
-        if (!enrollments || enrollments.length === 0) throw new HttpError('No enrollments found', 404);
-
         res.json({
             enrollments: enrollments.map(enrollment => enrollment.toObject({ getters: true })),
             totalEnrollments,
@@ -76,7 +74,7 @@ const getEnrollments = async (req, res, next) => {
 const getEnrollmentsPerCourse = async (req, res, next) => {
     try {
         const { cid } = req.params;
-        const { page=1, limit=10, search = '', sortBy = 'name', sortOrder = 'asc' } = req.query;
+        const { page=1, limit=10, search = '' } = req.query;
     
         // ID validation
         if (!mongoose.Types.ObjectId.isValid(cid)) throw new HttpError('Invalid course ID format.', 400);
@@ -105,13 +103,6 @@ const getEnrollmentsPerCourse = async (req, res, next) => {
 
         const totalEnrollments = await Enrollment.countDocuments(filter);
 
-        const sortOptions = {};
-        if (sortBy === 'name') {
-            sortOptions['student.name'] = sortOrder === 'asc' ? 1 : -1;
-        } else {
-            sortOptions[sortBy] = sortOrder === 'asc' ? 1 : -1;
-        }
-
         const enrollments = await Enrollment.find(filter)
             .populate({ 
                 path: 'course', 
@@ -131,9 +122,6 @@ const getEnrollmentsPerCourse = async (req, res, next) => {
             })            
             .skip((pageNumber - 1) * limitNumber)
             .limit(limitNumber)
-            .sort(sortOptions);
-
-        if (!enrollments || enrollments.length === 0) throw new HttpError('No enrollments found', 404);
 
         res.json({
             enrollments: enrollments.map(enrollment => enrollment.toObject({ getters: true })),
